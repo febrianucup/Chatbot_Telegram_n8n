@@ -1,0 +1,1780 @@
+{
+  "name": "BIMBO Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Pertanyaan Siswa:\n{{ $('Final Prompt').item.json.final_promt }}",
+        "options": {
+          "systemMessage": "# PERAN & KARAKTER\nKamu adalah Mr. Bimbo, mentor bimbingan belajar yang ramah, sabar, dan suportif. \nTugas utamamu adalah membimbing siswa memahami konsep soal langkah demi langkah — bukan langsung memberikan jawaban instan.\n\n# ATURAN SAPAAN\nJangan pernah menggunakan kata \"kakak\", \"kak\", atau \"adik\" sebagai sapaan.\nSelalu gunakan nama panggilan \"Mr. Bimbo\" secara konsisten saat menyebut dirimu sendiri.\n\n# ATURAN WAJIB MEMORI (CONTEXT RETRIEVAL)\n- Sebelum merespons pertanyaan apa pun, TERUTAMA jika user meminta ringkasan atau pembuatan PDF, WAJIB periksa riwayat percakapan sebelumnya (*chat history* dari memori).\n- Jangan pernah berasumsi bahwa riwayat kosong atau menanyakan ulang topik yang baru saja dibahas di pesan sebelumnya.\n\n# ATURAN MENANGANI SOAL (TEKS / GAMBAR / PDF)\n1. Jika siswa melampirkan atau mengirimkan teks, gambar, atau PDF berisi soal:\n   - Analisis isinya, lalu jelaskan langkah pengerjaannya secara runtut dan mudah dipahami.\n2. Jika siswa hanya mengirim pesan teks biasa, sapaan, atau pertanyaan umum tanpa dokumen/PDF:\n   - Tanggapi dengan ramah dan tanyakan materi apa yang ingin dipelajari hari ini.\n   - Jangan pernah mengeluhkan atau menyebutkan bahwa \"tidak ada PDF yang terbaca\" dalam situasi ini — ini bukan sebuah kegagalan, memang tidak ada dokumen yang dikirim.\n3. Jika terjadi kegagalan teknis nyata saat memproses dokumen (misalnya file rusak, tidak bisa dibuka, atau format tidak didukung):\n   - Sampaikan dengan cara yang tetap ramah dan suportif, tanpa membuat siswa merasa disalahkan.\n   - Contoh: \"Sepertinya Mr. Bimbo agak kesulitan membaca dokumennya. Bisa dicoba kirim ulang, atau ceritakan saja soalnya lewat teks?\"\n\n# ATURAN PENGGUNAAN TOOL PENCARIAN (TAVILY)\n1. Gunakan tool pencarian web hanya ketika siswa secara eksplisit meminta link, tautan video, atau referensi materi pembelajaran.\n2. Optimasi Query Pencarian: Saat memanggil tool, pastikan query pencarian difokuskan ke platform YouTube (misalnya dengan menambahkan kata kunci seperti `site:youtube.com` atau kata \"video pembelajaran\").\n3. Pemilihan Hasil:\n   - Dari daftar hasil yang dikembalikan oleh *tool*, pilih HANYA SATU URL video YouTube yang paling relevan.\n   - Sertakan link tersebut apa adanya (format URL valid, mengandung youtube.com/watch?v= atau youtu.be/).\n   - Jangan pernah mengubah, memodifikasi, atau membuat link palsu di luar dari hasil yang ditemukan oleh *tool*.\n\n# ATURAN FORMAT JAWABAN (MODE CHAT BIASA)\n- Gunakan format teks Unicode standar atau markdown sederhana (contoh: x^2, bukan LaTeX mentah), agar mudah dibaca di WhatsApp.\n- Jangan gunakan sintaks LaTeX (seperti \\frac{}{} atau $...$) dalam mode ini.\n- Jika menyajikan rangkuman atau daftar konsep, JANGAN gunakan tabel ASCII bergaris. Gunakan format daftar bernomor dengan Bold pada judulnya, contoh:\n1. Vektor di R^2\nRumus: a = (x, y) atau a = xi + yj\nKeterangan: Punya 2 komponen\"*\n\n# ATURAN KHUSUS: PERMINTAAN PEMBUATAN PDF\nJika siswa secara eksplisit meminta jawaban dibuatkan dalam bentuk PDF:\n- Seluruh respons HARUS berupa kode HTML murni.\n- JANGAN gunakan tag pembungkus seperti ```html.\n- JANGAN sertakan teks percakapan, salam, atau penjelasan apa pun di luar tag HTML.\n- Output harus siap langsung diproses oleh Gotenberg tanpa modifikasi tambahan.\n- Jika siswa meminta tabel, setelah memberikan jawaban, berikan tawaran kepada siswa untuk membuatkan tabel dalam bentuk pdf.\n- Jika siswa meminta pembuatan PDF atau ringkasan namun tidak menyertakan materi secara spesifik di pesan terakhir:\n   - Periksa riwayat percakapan sebelumnya (memory) untuk melihat topik atau materi apa yang baru saja dibahas.\n   - Jika materi ditemukan di memori, gunakan materi tersebut untuk menyusun isi PDF secara otomatis.\n   - Jika materi tidak ditemukan sama sekali di memori, tanyakan dengan ramah kepada siswa materi apa yang ingin dimasukkan ke dalam PDF tersebut."
+        }
+      },
+      "id": "8d67a21f-ecab-4cdb-8f67-1b137b9ef704",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1184,
+        752
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "id": "b67a3d98-2f37-4252-ba42-1379a8cfb6ba",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1200,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f90de1b6-c969-4d03-ad49-55bd99f4ba71",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.photo ? 'image' : '' }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text ? 'text' : '' }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "56e1d8fb-6473-490f-af44-8d03b81f023f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5e486e21-4e0d-48c6-aa44-231f2808feb7",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.document ? 'document' : '' }}",
+                    "rightValue": "document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "file"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "fdf28778-d9e8-46cc-bf01-4ec66c71bf5a",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e97e696-8efa-4938-be4b-f6a6d3d4a66c",
+              "name": "Text",
+              "value": "Maaf, Mr. Bimbo sedang mengalami gangguan atau sibuk saat ini. Silakan coba beberapa saat lagi ya.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1648,
+        800
+      ],
+      "id": "3aef9645-ca92-4696-ae64-9ad4b8d4eb4b",
+      "name": "Err Handler"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_SERVER_IP:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Api-Key",
+              "value": "BIMBOAIAGENT"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session",
+              "value": "WAHA"
+            },
+            {
+              "name": "chatId",
+              "value": "={{ $('Webhook').item.json.body.payload.from }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.Text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4944a5fb-9041-436b-87b1-02ca017b715d",
+      "name": "Send Message Not Registed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -288,
+        2736
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://YOUR_SERVER_IP:3000/api/WAHA/lids/{{ $json.body.payload.from }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "BIMBOAIAGENT"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -960,
+        1616
+      ],
+      "id": "2c1d3576-44e9-4330-a323-dd2fc24386a0",
+      "name": "Parsing Number"
+    },
+    {
+      "parameters": {
+        "jsCode": "let rawPhone =  $input.first().json.pn || \"\";\n\nlet cleanPhone = rawPhone.replace(/\\D/g, \"\");\n\nif (cleanPhone.startsWith(\"0\")) {\n  cleanPhone = \"62\" + cleanPhone.slice(1);\n}\n\nreturn { json: { phoneNumber: cleanPhone } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        2064
+      ],
+      "id": "8c7ffa4c-5b51-4a5c-a0b3-860284f6bd1d",
+      "name": "Code to ClearNumber"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_SISWA",
+          "mode": "list",
+          "cachedResultName": "No Siswa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "HP  siswa",
+              "lookupValue": "={{ $json.phoneNumber }}"
+            },
+            {
+              "lookupColumn": "HP ortu",
+              "lookupValue": "={{ $json.phoneNumber }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -960,
+        2736
+      ],
+      "id": "4f78aa4c-699c-4fbb-b821-da23e489a174",
+      "name": "Get Number Siswa",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "Jc6ZmXrDqYmwtSSE",
+          "name": "Google Service Account account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "eccb73ae-b9cb-411a-bc4f-610075ce0f43",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.text || $('Telegram Trigger').item.json.message.caption || $('Telegram Trigger').item.json.message.photo || $('Telegram Trigger').item.json.message.document.file_id }}",
+              "rightValue": "message",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0c3c9bee-af85-451c-a763-c3fc311ee7db",
+      "name": "Message Sorter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e964517d-5f2b-430a-88b1-db42861161cc",
+              "leftValue": "={{ $('Get Number Siswa').item.json.Nama }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -736,
+        2736
+      ],
+      "id": "b0d941c8-3efd-4572-a48c-14e63b32f078",
+      "name": "Phone Number Sorter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0d9cd621-835f-4522-962e-66f6217d02ef",
+              "name": "Text",
+              "value": "=Halo! Mohon maaf, sepertinya nomor kamu belum terdaftar sebagai siswa di bimbel kami. Silakan hubungi admin di 08xxxxxxxxxx untuk pendaftaran ya. Terima kasih! 😊",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -512,
+        2736
+      ],
+      "id": "56e0a43a-85bf-4217-a76d-34c1c452a502",
+      "name": "Not Registed Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "df9b4bdb-7ce1-4594-855a-7e8862c9bdd4",
+              "name": "final_output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1872,
+        800
+      ],
+      "id": "1ae7fc94-fb1e-4825-88fc-82c4ec63c2a2",
+      "name": "Output"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        992
+      ],
+      "id": "e2b777dd-f6e5-481d-a066-209088142e9f",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "sW44ekqbMf1KCdDs",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "text": "Tulis ulang isi dari PDF berikut ini:",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        928
+      ],
+      "id": "a2c3d23a-d61d-4aed-84c8-075c8be9f955",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QQpsxIl8fPqMCxf2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_NILAI",
+          "mode": "list",
+          "cachedResultName": "Data nilai",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_NILAI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_NILAI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "5f1a496c-11fc-4ace-aa8d-e9fa18998337",
+      "name": "Get Row's Data Nilai",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1328,
+        992
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "A8sntNvtxFFeKTuH",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13bb60e5-c8e2-48d4-930e-cb20bc2d7cc6",
+              "name": "final_promt",
+              "value": "=Pesan dari siswa: {{ $('Telegram Trigger').item.json.message.text || $('Telegram Trigger').item.json.message.caption || 'Tolong selesaikan soal berikut' }}\n\nLampiran File/Gambar dari Siswa: {{ $('Message Sorter').item.json.message.photo ? $('Message Sorter').item.json.message.photo.pop().file_id : 'Tidak ada gambar' }}\n\nIsi Dokumen PDF dari Siswa:\n{{ $json.text || $json.content?.parts?.[0]?.text || 'Tidak ada teks yang diekstrak' }}\n\n[Instruksi: Analisis teks dokumen PDF di atas, cari soal yang dimaksud oleh siswa, lalu berikan penjelasan langkah demi langkah yang ramah sesuai karakter Mr. Bimbo.]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        752
+      ],
+      "id": "c68f48a2-8d9e-42d1-9fe1-54bf7fff7dc4",
+      "name": "Final Prompt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "436fb18b-2ccc-4138-83a9-9de371dbff9a",
+              "leftValue": "={{ $json.final_promt }}",
+              "rightValue": "video",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "d02b0956-216e-4cad-b73e-92ebd7f85c8f",
+              "leftValue": "={{ $json.final_promt }}",
+              "rightValue": "link",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "a10be5e9-4d9a-4854-97c3-d90d05be7d89",
+              "leftValue": "={{ $json.final_promt }}",
+              "rightValue": "youtube",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -960,
+        2512
+      ],
+      "id": "20228cea-2b7f-4603-b34d-06eb9fffbaca",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "text": "=Tolong baca, transkripsikan, dan tulis ulang soal atau teks yang terdapat di dalam gambar ini secara lengkap.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        560
+      ],
+      "id": "47cfe3e2-cda9-4bdb-9e41-2fc127ed62f0",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QQpsxIl8fPqMCxf2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "df66c43d-e872-49bc-b64b-30e32f37cd97",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "<html>",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "8f66bc83-7a8e-4fb3-90c2-6183c430c49d",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "<!DOCTYPE html>",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1648,
+        608
+      ],
+      "id": "7651dd2e-f0a2-441b-ad4c-06adaac84d89",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {
+          "fileName": "index.html"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1872,
+        512
+      ],
+      "id": "3279ea37-fee7-4295-bf26-c747ca3da9dd",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.17.0.1:3001/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "index.html",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2320,
+        512
+      ],
+      "id": "6fef91c4-6e51-4ae2-82f2-6d376331431c",
+      "name": "Generate PDF"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const buffer = await this.helpers.getBinaryDataBuffer(i, 'data');\n  items[i].json.fileBase64 = buffer.toString('base64');\n  results.push(items[i]);\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        1168
+      ],
+      "id": "27b1301a-7e39-4b05-a76a-517b20845ee5",
+      "name": "convert to fileBase64"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        512
+      ],
+      "id": "6acbde09-3d27-458e-a946-53e2ba471aef",
+      "name": "Wait",
+      "webhookId": "57faeacb-2847-417b-9086-97901b986b22"
+    },
+    {
+      "parameters": {
+        "query": "=video pembelajaran {{ $json.final_promt.replace(/[\\n\\r]+/g, ' ').substring(0, 80) }} indonesia",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        2512
+      ],
+      "id": "a303a1e5-f28d-4e4b-9740-c4e5003786d0",
+      "name": "Search",
+      "credentials": {
+        "tavilyApi": {
+          "id": "4qIuTFuFb1hoZykD",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        992
+      ],
+      "id": "a2aebf2f-5b51-4e5c-94cf-ffb19d446e48",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "4qIuTFuFb1hoZykD",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"api_key\": \"YOUR_TAVILY_API_KEY\",\n  \"query\": \"video pembelajaran {{ $json.final_promt.replace(/[\\n\\r]+/g, ' ').substring(0, 80) }} indonesia\",\n  \"search_depth\": \"basic\",\n  \"max_results\": 3,\n  \"include_domains\": [\"youtube.com\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -960,
+        2288
+      ],
+      "id": "a9543aa6-8d78-4530-865e-7221ddd08928",
+      "name": "link request"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -960,
+        656
+      ],
+      "id": "36ffaa9c-f4d3-4caa-aa9d-894193809897",
+      "name": "Telegram Trigger",
+      "webhookId": "d2561fc7-1633-4f90-b54a-140be47fc8a3",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        928
+      ],
+      "id": "1cd37b18-42dd-4b30-b2da-68857d407aa0",
+      "name": "Get a file1",
+      "webhookId": "6bb84584-10c9-4b5a-b622-d9493a723adb",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ddd01f28-fcc0-44dc-87dc-c9e2cd73403a",
+              "leftValue": "={{ $json.Id_telegram }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        848
+      ],
+      "id": "57469602-1e5c-4aea-b99d-e04ca4457cdc",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_SISWA",
+          "mode": "list",
+          "cachedResultName": "No Siswa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 808821707,
+          "mode": "list",
+          "cachedResultName": "ID Telgram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit#gid=808821707"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "=telegram_id",
+              "lookupValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -960,
+        1392
+      ],
+      "id": "2cb34538-33c1-4d54-9d6a-99014c082f2e",
+      "name": "Get Id Siswa",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "Jc6ZmXrDqYmwtSSE",
+          "name": "Google Service Account account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_SISWA",
+          "mode": "list",
+          "cachedResultName": "No Siswa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "No Siswa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "HP  siswa",
+              "lookupValue": "={{ $('Telegram Trigger').item.json.message.contact.phone_number }}"
+            },
+            {
+              "lookupColumn": "HP ortu",
+              "lookupValue": "={{ $('Telegram Trigger').item.json.message.contact.phone_number }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -960,
+        -80
+      ],
+      "id": "69ea8d1e-3871-4106-a4b5-4b23cb8e3749",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "Jc6ZmXrDqYmwtSSE",
+          "name": "Google Service Account account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "60c70a66-3183-471b-8551-f60dbbbf3801",
+              "leftValue": "={{ $json.Nama }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        464
+      ],
+      "id": "40381219-cbe0-4e3e-a1e1-2b5c74e1e4fa",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_SISWA",
+          "mode": "list",
+          "cachedResultName": "No Siswa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 808821707,
+          "mode": "list",
+          "cachedResultName": "ID Telgram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_SISWA/edit#gid=808821707"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telegram_id": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+            "no_hp": "={{ $json['HP  siswa'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "telegram_id",
+              "displayName": "telegram_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "no_hp",
+              "displayName": "no_hp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -960,
+        144
+      ],
+      "id": "b23e322f-cb32-4a48-86fa-b92e12288e05",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "Jc6ZmXrDqYmwtSSE",
+          "name": "Google Service Account account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2fc82de8-e42f-4969-8958-de3174e94d4d",
+              "leftValue": "={{ $json.message.contact }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -736,
+        656
+      ],
+      "id": "5bce9cf4-2a96-4ae9-9c5c-e9fb455fb922",
+      "name": "checking contact exist"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "Bimbo_Materi.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2544,
+        512
+      ],
+      "id": "30bd4250-e346-4ac4-932b-5f6a0d53e33b",
+      "name": "Send a document",
+      "webhookId": "aad39878-c243-41c4-a818-fa911bca663d",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Nomor kamu sudah terverivikasi, silahkan jika da yang ingin dibantu, Mr. Bimbo akan siap selalu",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Bagikan Nomor Telepon",
+                    "additionalFields": {
+                      "request_contact": true
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        368
+      ],
+      "id": "1f8172ab-cf0d-412e-b9c9-b2946da83961",
+      "name": "Send message success",
+      "webhookId": "f10b479c-025e-4399-a4bd-9da4a9c60365",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Halo! Mohon maaf, sepertinya nomor kamu belum terdaftar sebagai siswa di Bimbel Oemahan ya. Mr. Bimbo adalah layanan eksklusif buat siswa Bimbel Oemahan. Silakan hubungi admin di 08xxxxxxxxxx untuk pendaftaran ya. Terima kasih! 😊",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        560
+      ],
+      "id": "7f5b6acb-9a90-4e6e-bedc-9dcaaf7fcdc6",
+      "name": "Send message not registed",
+      "webhookId": "d00665a1-eae8-465a-bbc3-820fe742d801",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Halo! Untuk menggunakan chatbot ini, silakan bagikan nomor telepon Anda terlebih dahulu dengan menekan tombol di bawah ini.",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Bagikan Nomor Telepon",
+                    "additionalFields": {
+                      "request_contact": true
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        944
+      ],
+      "id": "e8032b74-af6e-4314-9a2e-e919b5642810",
+      "name": "Send request contact",
+      "webhookId": "f10b479c-025e-4399-a4bd-9da4a9c60365",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.photo[2].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        560
+      ],
+      "id": "886dec11-4b2f-46df-9ced-dbbe3a9ea712",
+      "name": "Get photo",
+      "webhookId": "6e9ae5fe-dc68-499b-89f2-6e7431fd47ab",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.final_output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2096,
+        800
+      ],
+      "id": "ff72341c-1f68-4154-b95d-eae800f1fa1d",
+      "name": "Send response",
+      "webhookId": "6077e248-9f21-4b26-bb57-a78cb9a7f9e6",
+      "credentials": {
+        "telegramApi": {
+          "id": "E5VQPtJQki54Xdoo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/bot8821981361:AAGg_FlEliNi6uTQtispBTOc20UHqXf8ES0/{{ $('Telegram Trigger').item.json.message.photo[0].file_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -960,
+        1840
+      ],
+      "id": "33ed6724-7305-4455-9257-2d32ca0365e9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "tableId": "telegram_id",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Id_telegram",
+              "fieldValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            },
+            {
+              "fieldId": "no_hp",
+              "fieldValue": "={{ $('Telegram Trigger').item.json.message.contact.phone_number }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        368
+      ],
+      "id": "dbfb2390-1908-46ab-b862-dfec986e5a23",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "G1wWF5P3PJrLTZP4",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "operation": "getAll",
+        "tableId": "no_hp",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "hp_siswa",
+              "condition": "eq",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.contact.phone_number }}"
+            },
+            {
+              "keyName": "hp_ortu",
+              "condition": "eq",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.contact.phone_number }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        464
+      ],
+      "id": "409e9144-fd1b-4ab1-bc17-b17fc81e7b79",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "G1wWF5P3PJrLTZP4",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "operation": "getAll",
+        "tableId": "telegram_id",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Id_telegram",
+              "condition": "eq",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        848
+      ],
+      "id": "ec17e239-ea11-4123-afdd-24bfd71de0fd",
+      "name": "Get many rows1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "G1wWF5P3PJrLTZP4",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Err Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get photo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Final Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Err Handler": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsing Number": {
+      "main": [
+        []
+      ]
+    },
+    "Code to ClearNumber": {
+      "main": [
+        []
+      ]
+    },
+    "Get Number Siswa": {
+      "main": [
+        [
+          {
+            "node": "Phone Number Sorter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Sorter": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phone Number Sorter": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Not Registed Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Registed Message": {
+      "main": [
+        [
+          {
+            "node": "Send Message Not Registed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output": {
+      "main": [
+        [
+          {
+            "node": "Send response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Final Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Row's Data Nilai": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "Final Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "convert to fileBase64": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        []
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "checking contact exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file1": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Message Sorter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send request contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Id Siswa": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send message not registed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "checking contact exist": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get photo": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Send message success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Jakarta",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "60013d7f-8c1b-4d58-b4f2-5f7a845c2423",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "096c93afa808a02641f768d8c66728ad5b67b0342fb8ec7e0a818885618ca5c3"
+  },
+  "nodeGroups": [],
+  "id": "84dfLPagCZ18NPG9",
+  "tags": []
+}
