@@ -1,48 +1,48 @@
-# BIMBO AI Telegram Chatbot (n8n Workflow)
+# Asisten Tutor AI Telegram (n8n Workflow)
 
-An intelligent tutoring assistant chatbot for Telegram powered by **n8n**, **DeepSeek AI**, and **Google Gemini**, acting as **Mr. Bimbo** — a friendly, patient, and supportive tutoring mentor.
-
----
-
-## Features
-
-1. **Pedagogical Persona ("Mr. Bimbo")**:
-   - Guides students to understand concepts step-by-step rather than giving instant answers.
-   - Strictly avoids using terms like "kakak", "kak", or "adik", addressing itself consistently as **Mr. Bimbo**.
-
-2. **Multimodal Capabilities**:
-   - **Text Messages**: Answers general inquiries, greets students, and prompts them for study topics.
-   - **Photos & Images**: Analyzes attached problem images or screenshots.
-   - **Documents & PDFs**: Extracts and analyzes text and problems from uploaded PDFs using Google Gemini.
-
-3. **Memory & Context**:
-   - Maintains conversation context per user using an n8n Memory Buffer Window keyed by Telegram Chat ID.
-
-4. **Google Sheets Integration**:
-   - Looks up student registration and grades data directly via Google Sheets nodes and tools.
+Chatbot asisten pembelajaran cerdas untuk Telegram yang ditenagai oleh **n8n**, **DeepSeek AI**, dan **Google Gemini**, berfungsi sebagai mentor bimbingan belajar yang ramah, sabar, dan suportif dalam membimbing siswa memahami konsep soal langkah demi langkah.
 
 ---
 
-## Workflow Structure (`Chatbot Telegram.sanitized.json`)
+## Fitur Utama
 
-- **Telegram Trigger**: Receives incoming messages, photos, and documents from Telegram.
-- **Message Sorter (Switch/If)**: Routes inputs based on whether they contain text, images, or documents.
-- **Google Gemini (Analyze Document)**: Extracts contents and questions from uploaded PDFs or documents.
-- **Final Prompt Node**: Combines user messages, image IDs, and extracted document contents into a structured prompt for the AI Agent.
-- **AI Agent & LLM (DeepSeek Chat Model)**: Generates pedagogical responses following the Mr. Bimbo system prompt.
-- **Simple Memory**: Stores and retrieves recent chat context.
-- **Google Sheets Tool**: Allows the agent to query student data and scores on demand.
-- **Error Handler**: Gracefully handles runtime issues and provides fallback messages.
+1. **Karakter & Persona Pendidik**:
+   - Membimbing siswa memahami konsep soal secara runtut dan bertahap, bukan sekadar memberikan jawaban instan.
+   - Menggunakan sapaan yang konsisten dan ramah sesuai instruksi sistem.
+
+2. **Dukungan Multimodal**:
+   - **Pesan Teks**: Menanggapi sapaan, percakapan umum, atau pertanyaan materi pelajaran.
+   - **Gambar/Foto**: Menerima dan memproses lampiran foto atau tangkapan layar soal dari siswa.
+   - **Dokumen/PDF**: Mengekstrak dan menganalisis teks serta soal dari dokumen PDF yang dikirimkan menggunakan Google Gemini.
+
+3. **Memori & Konteks Percakapan**:
+   - Menyimpan riwayat percakapan per pengguna menggunakan n8n Memory Buffer Window yang diidentifikasi berdasarkan ID Telegram chat.
+
+4. **Integrasi Google Sheets**:
+   - Melakukan pengecekan data siswa, nomor telepon, dan rekap nilai secara otomatis melalui node dan tool Google Sheets.
 
 ---
 
-## Setup & Deployment
+## Struktur Workflow (`Chatbot Telegram.sanitized.json`)
 
-1. Import `Chatbot Telegram.sanitized.json` into your **n8n** instance.
-2. Configure your credentials:
-   - Telegram Bot API Token
+- **Telegram Trigger**: Menerima pesan, foto, dan dokumen yang masuk dari bot Telegram.
+- **Message Sorter (Switch/If)**: Memilah jenis pesan (teks, gambar, atau dokumen).
+- **Google Gemini (Analyze Document)**: Mengekstrak isi teks dan soal dari dokumen PDF.
+- **Final Prompt**: Menggabungkan pesan siswa, ID gambar, dan hasil ekstraksi dokumen menjadi *prompt* terstruktur untuk AI Agent.
+- **AI Agent & LLM (DeepSeek Chat Model)**: Menghasilkan respons pedagogis yang sesuai dengan instruksi sistem.
+- **Simple Memory**: Mengelola memori riwayat percakapan singkat.
+- **Google Sheets Tool**: Memungkinkan agen untuk mengakses dan query data siswa/nilai saat dibutuhkan.
+- **Error Handler**: Menangani gangguan sistem atau error secara elegan dengan pesan cadangan yang ramah.
+
+---
+
+## Panduan Instalasi & Penggunaan
+
+1. Impor file `Chatbot Telegram.sanitized.json` ke dalam instance **n8n** Anda.
+2. Konfigurasikan kredensial yang diperlukan:
+   - Token Bot Telegram
    - DeepSeek API
    - Google Gemini (PaLM) API
-   - Google Sheets Service Account
-3. Update placeholders (such as spreadsheet IDs and server URLs) in the workflow nodes to match your environment.
-4. Activate the workflow and test interaction via your Telegram Bot.
+   - Akun Layanan (Service Account) Google Sheets
+3. Sesuaikan parameter ID Spreadsheet dan pengaturan lainnya pada node workflow agar sesuai dengan lingkungan Anda.
+4. Aktifkan workflow dan uji coba bot melalui Telegram.
