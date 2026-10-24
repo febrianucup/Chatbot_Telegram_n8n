@@ -38,7 +38,7 @@ Chatbot asisten pembelajaran cerdas untuk Telegram yang ditenagai oleh **n8n**, 
 
 ## Panduan Instalasi & Penggunaan
 
-1. Impor file `Chatbot Telegram.sanitized.json` ke dalam instance **n8n** Anda.
+1. Impor file `Chatbot Telegram.json` ke dalam instance **n8n** Anda.
 2. Konfigurasikan kredensial yang diperlukan:
    - Token Bot Telegram
    - DeepSeek API
