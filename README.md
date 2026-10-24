@@ -23,7 +23,7 @@ Chatbot asisten pembelajaran cerdas untuk Telegram yang ditenagai oleh **n8n**, 
 
 ---
 
-## Struktur Workflow (`Chatbot Telegram.sanitized.json`)
+## Struktur Workflow
 
 - **Telegram Trigger**: Menerima pesan, foto, dan dokumen yang masuk dari bot Telegram.
 - **Message Sorter (Switch/If)**: Memilah jenis pesan (teks, gambar, atau dokumen).
